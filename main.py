@@ -1,9 +1,13 @@
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
 
-intervalle_temps = 480
+intervalle_temps = 360
 delta_t = 10
 n_intervalles = int(intervalle_temps/delta_t)
-n_ev = 10
+n_ev = 30
+p_ev = 3 #kW
+voit = []
 
 class Voiture:
     def __init__(self, load_time, P):
@@ -11,8 +15,6 @@ class Voiture:
         self.P = P
         self.load_need = int(self.load_time/delta_t) #Hypothèse que le besoin en charge est inférieur au temps total.
 
-    def load():
-        self.load_need-=1
 
 def load_table(voitures):
 
@@ -21,34 +23,69 @@ def load_table(voitures):
     c2 = voitures[0].load_need
     v=0
 
-    while v<len(voitures):
+    while v+1<len(voitures):
 
         for t in range(c1, c2):
             L[v][t] = 1
-            voitures[v].load
+            voitures[v].load_need = voitures[v].load_need - 1
             c1+=1
         
-        reste = n_intervalles-c1
-
-        while reste > 0 :
-            while voitures[v+1].load_need>0 and v+1<len(voitures):
-                    L[v+1][c1]=1
-                    voitures[v+1].load
-                    c1+=1
-
-                    reste = n_intervalles-c1
+        if c1 == n_intervalles:
             v+=1
+        else:
+            while c1 < n_intervalles:
+                while v+1<len(voitures):
+                    while voitures[v+1].load_need>0:
 
+                        L[v+1][c1]=1
+                        voitures[v+1].load_need = voitures[v+1].load_need - 1
+                        c1+=1
+
+                        if c1 == n_intervalles:
+                            break
+
+                    if c1 == n_intervalles and voitures[v+1].load_need == 0:
+                        v+=1
+                        break            
+                    elif c1 == n_intervalles and voitures[v+1].load_need > 0:
+                        break
+                    else:
+                        v+=1
+                if v+1 == len(voitures):
+                    break 
+                    
         c1 = 0
-        c2 = voitures[v].load_need()
-
+        c2 = voitures[v].load_need
+        
     return L
 
-voit = []
-for i in range(10):
-    voit.append(Voiture(120, 3))
+for i in range(n_ev):
+    voit.append(Voiture(150, 3))
 
-print(load_table(voit))
 
-print(voit[0].load_need)        
+table = load_table(voit)
+print(table)
 
+puissance = np.sum(table,0) * p_ev
+print(puissance)
+
+
+## Diagramme du planning de charge
+# Define colormap
+
+cmapmine = ListedColormap(['w', 'b'], N=2)
+
+# Plot matrix
+
+fig, ax1 = plt.subplots(1)
+ax1.imshow(table, cmap=cmapmine, vmin=0, vmax=1)
+ax1.set_title('Répartition de charge dans le temps')
+
+plt.show()
+
+## Appel de puissance en fonction du temps
+
+plt.plot(puissance)
+plt.plot(np.ones(n_intervalles)*n_ev*p_ev)
+plt.ylim(0, p_ev*n_ev*1.05)
+plt.show()
