@@ -8,6 +8,7 @@ n_intervalles = int(intervalle_temps/delta_t)
 n_ev = 30
 p_ev = 3 #kW
 voit = []
+table_naive = np.zeros((n_ev,n_intervalles))
 
 class Voiture:
     def __init__(self, load_time, P):
@@ -62,13 +63,15 @@ def load_table(voitures):
 for i in range(n_ev):
     voit.append(Voiture(150, 3))
 
+for i in range(n_ev):
+    for t in  range(voit[i].load_need):
+        table_naive[i][t]=1
 
-table = load_table(voit)
-print(table)
+table_charge_opti = load_table(voit)
+print(table_charge_opti)
 
-puissance = np.sum(table,0) * p_ev
-print(puissance)
-
+puissance_opti = np.sum(table_charge_opti,0) * p_ev
+puissance_naive = np.sum(table_naive,0) * p_ev
 
 ## Diagramme du planning de charge
 # Define colormap
@@ -78,14 +81,14 @@ cmapmine = ListedColormap(['w', 'b'], N=2)
 # Plot matrix
 
 fig, ax1 = plt.subplots(1)
-ax1.imshow(table, cmap=cmapmine, vmin=0, vmax=1)
+ax1.imshow(table_charge_opti, cmap=cmapmine, vmin=0, vmax=1)
 ax1.set_title('Répartition de charge dans le temps')
 
 plt.show()
 
 ## Appel de puissance en fonction du temps
 
-plt.plot(puissance)
-plt.plot(np.ones(n_intervalles)*n_ev*p_ev)
+plt.plot(puissance_opti)
+plt.plot(puissance_naive)
 plt.ylim(0, p_ev*n_ev*1.05)
 plt.show()
