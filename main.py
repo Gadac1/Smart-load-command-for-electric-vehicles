@@ -1,12 +1,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
+import random
 
-intervalle_temps = 360
-delta_t = 10
+intervalle_temps = 360 #Un intervalle global de charge en minutes (par exemple 360min pour une nuit de 8h)
+delta_t = 10 #Un découpage temporel en minutes
 n_intervalles = int(intervalle_temps/delta_t)
-n_ev = 30
-p_ev = 3 #kW
+n_ev = 30 #Le nombre de véhicule électriques à simuler
+p_ev = 3 #kW, l'appel de puissance de chaques véhicules
+
 voit = []
 table_naive = np.zeros((n_ev,n_intervalles))
 
@@ -61,7 +63,7 @@ def load_table(voitures):
     return L
 
 for i in range(n_ev):
-    voit.append(Voiture(150, 3))
+    voit.append(Voiture(random.randint(100,200), 3))
 
 for i in range(n_ev):
     for t in  range(voit[i].load_need):
