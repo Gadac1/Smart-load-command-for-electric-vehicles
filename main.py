@@ -66,6 +66,17 @@ plt.legend(("Chargement Smart","Chargement Naif"))
 plt.ylim(0, p_ev*n_ev*1.05)
 plt.show()
 
+## Appel de puissance réactive totale
+
+plt.plot(Time_Day, active_house_load,'r')
+plt.plot(Time_Day, active_house_load+active_load_ev_naif,'g')
+plt.plot(Time_Day, active_house_load+active_load_ev_smart,'b')
+plt.title("Appel de puissance réactive total")
+plt.xlabel("Temps")
+plt.ylabel("Puissance (W)")
+plt.legend(("Chargement Naif","Chargement Smart"))
+plt.show()
+
 ## Affichage DeltaV
 plt.plot(Time_Day, Delta_U_1_no_ev, 'r')
 plt.plot(Time_Day, Delta_U_2_no_ev, 'r')
