@@ -4,7 +4,6 @@ from matplotlib.colors import ListedColormap
 import random
 from house_load import *
 from main import *
-import sympy as sp
 
 Time_Day = np.linspace(1,24,24)
 T_Sim = np.linspace(0, intervalle_temps, n_intervalles)
