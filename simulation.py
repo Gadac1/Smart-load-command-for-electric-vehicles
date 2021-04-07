@@ -91,7 +91,6 @@ plt.plot(Time_Day, Delta_U_3_ev_smart, 'b')
 plt.title("Chute de tension dans les trois branches sans EV")
 plt.xlabel("Temps")
 plt.ylabel("Volt (V)")
-plt.legend(("Branche 1","Branche 2", "Branche 3"))
 plt.show()
 
 ## Affichage Courant
