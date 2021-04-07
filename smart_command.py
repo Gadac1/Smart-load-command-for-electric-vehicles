@@ -6,7 +6,7 @@ import random
 intervalle_temps = 840 #Un intervalle global de charge en minutes (par exemple 360min pour une nuit de 8h)
 delta_t = 10 #Un découpage temporel en minutes
 n_intervalles = int(intervalle_temps/delta_t)
-n_ev = 30 #Le nombre de véhicule électriques à simuler
+n_ev = 24 #Le nombre de véhicule électriques à simuler
 p_ev = 6000 #W, l'appel de puissance de chaques véhicules
 
 voit = []
