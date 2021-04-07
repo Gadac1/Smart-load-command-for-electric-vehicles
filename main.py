@@ -3,26 +3,28 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import random
 
-intervalle_temps = 360 #Un intervalle global de charge en minutes (par exemple 360min pour une nuit de 8h)
+intervalle_temps = 840 #Un intervalle global de charge en minutes (par exemple 360min pour une nuit de 8h)
 delta_t = 10 #Un découpage temporel en minutes
 n_intervalles = int(intervalle_temps/delta_t)
 n_ev = 30 #Le nombre de véhicule électriques à simuler
-p_ev = 3 #kW, l'appel de puissance de chaques véhicules
+p_ev = 6 #kW, l'appel de puissance de chaques véhicules
 
 voit = []
 table_naive = np.zeros((n_ev,n_intervalles))
+T = np.linspace(0, intervalle_temps, n_intervalles)
 
 class Voiture:
-    def __init__(self, load_time, P):
+    def __init__(self, load_time, load_start, P):
         self.load_time = load_time
         self.P = P
         self.load_need = int(self.load_time/delta_t) #Hypothèse que le besoin en charge est inférieur au temps total.
+        self.load_start = int(load_start/delta_t)
 
 
 def load_table(voitures):
 
     L = np.zeros((n_ev,n_intervalles))
-    c1 = 0
+    c1 = voitures[0].load_start
     c2 = voitures[0].load_need
     v=0
 
@@ -57,23 +59,26 @@ def load_table(voitures):
                 if v+1 == len(voitures):
                     break 
                     
-        c1 = 0
+        c1 = voitures[v].load_start
         c2 = voitures[v].load_need
         
     return L
 
 for i in range(n_ev):
-    voit.append(Voiture(random.randint(100,200), 3))
+    voit.append(Voiture(random.randint(120,480), random.randint(0,120), 6))
+
+voit.sort(key = lambda x: x.load_start)
 
 for i in range(n_ev):
-    for t in  range(voit[i].load_need):
+    for t in  range(voit[i].load_start, voit[i].load_need):
         table_naive[i][t]=1
 
 table_charge_opti = load_table(voit)
-print(table_charge_opti)
+print(table_charge_opti) #Need trier par l'attribut load_start
 
 puissance_opti = np.sum(table_charge_opti,0) * p_ev
 puissance_naive = np.sum(table_naive,0) * p_ev
+
 
 ## Diagramme du planning de charge
 # Define colormap
@@ -84,13 +89,13 @@ cmapmine = ListedColormap(['w', 'b'], N=2)
 
 fig, ax1 = plt.subplots(1)
 ax1.imshow(table_charge_opti, cmap=cmapmine, vmin=0, vmax=1)
-ax1.set_title('Répartition de charge dans le temps')
+ax1.set_title('Répartition de charge dans le temps (temps en unité de delta_t)')
 
 plt.show()
 
 ## Appel de puissance en fonction du temps
 
-plt.plot(puissance_opti)
-plt.plot(puissance_naive)
+plt.plot(T, puissance_opti)
+plt.plot(T, puissance_naive)
 plt.ylim(0, p_ev*n_ev*1.05)
 plt.show()
