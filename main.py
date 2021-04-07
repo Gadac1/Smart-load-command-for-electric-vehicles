@@ -7,7 +7,7 @@ intervalle_temps = 840 #Un intervalle global de charge en minutes (par exemple 3
 delta_t = 10 #Un découpage temporel en minutes
 n_intervalles = int(intervalle_temps/delta_t)
 n_ev = 30 #Le nombre de véhicule électriques à simuler
-p_ev = 6 #kW, l'appel de puissance de chaques véhicules
+p_ev = 6000 #W, l'appel de puissance de chaques véhicules
 
 voit = []
 table_naive = np.zeros((n_ev,n_intervalles))
@@ -76,26 +76,13 @@ for i in range(n_ev):
 table_charge_opti = load_table(voit)
 print(table_charge_opti) #Need trier par l'attribut load_start
 
-puissance_opti = np.sum(table_charge_opti,0) * p_ev
+puissance_smart = np.sum(table_charge_opti,0) * p_ev
 puissance_naive = np.sum(table_naive,0) * p_ev
 
+active_load_ev_naif = np.zeros((24))
+for i in range(17, len(active_load_ev_naif)):
+    active_load_ev_naif[i] = puissance_naive[(i-17)*6]
 
-## Diagramme du planning de charge
-# Define colormap
-
-cmapmine = ListedColormap(['w', 'b'], N=2)
-
-# Plot matrix
-
-fig, ax1 = plt.subplots(1)
-ax1.imshow(table_charge_opti, cmap=cmapmine, vmin=0, vmax=1)
-ax1.set_title('Répartition de charge dans le temps (temps en unité de delta_t)')
-
-plt.show()
-
-## Appel de puissance en fonction du temps
-
-plt.plot(T, puissance_opti)
-plt.plot(T, puissance_naive)
-plt.ylim(0, p_ev*n_ev*1.05)
-plt.show()
+active_load_ev_smart = np.zeros((24))
+for i in range(17, len(active_load_ev_naif)):
+    active_load_ev_smart[i] = puissance_smart[(i-17)*6]
