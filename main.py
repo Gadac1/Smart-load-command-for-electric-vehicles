@@ -13,10 +13,11 @@ voit = []
 table_naive = np.zeros((n_ev,n_intervalles))
 
 class Voiture:
-    def __init__(self, load_time, P):
+    def __init__(self, load_time, load_start, P):
         self.load_time = load_time
         self.P = P
         self.load_need = int(self.load_time/delta_t) #Hypothèse que le besoin en charge est inférieur au temps total.
+        self.load_start = load_start
 
 
 def load_table(voitures):
@@ -63,7 +64,7 @@ def load_table(voitures):
     return L
 
 for i in range(n_ev):
-    voit.append(Voiture(random.randint(100,200), 3))
+    voit.append(Voiture(random.randint(100,200), random.randint(0,120), 6))
 
 for i in range(n_ev):
     for t in  range(voit[i].load_need):
