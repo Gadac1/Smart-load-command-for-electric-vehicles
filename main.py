@@ -7,7 +7,7 @@ intervalle_temps = 360 #Un intervalle global de charge en minutes (par exemple 3
 delta_t = 10 #Un découpage temporel en minutes
 n_intervalles = int(intervalle_temps/delta_t)
 n_ev = 30 #Le nombre de véhicule électriques à simuler
-p_ev = 3 #kW, l'appel de puissance de chaques véhicules
+p_ev = 6 #kW, l'appel de puissance de chaques véhicules
 
 voit = []
 table_naive = np.zeros((n_ev,n_intervalles))
