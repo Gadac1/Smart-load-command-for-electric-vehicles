@@ -2,87 +2,104 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import random
+from house_load import *
+from smart_command import *
 
-intervalle_temps = 840 #Un intervalle global de charge en minutes (par exemple 360min pour une nuit de 8h)
-delta_t = 10 #Un découpage temporel en minutes
-n_intervalles = int(intervalle_temps/delta_t)
-n_ev = 30 #Le nombre de véhicule électriques à simuler
-p_ev = 6000 #W, l'appel de puissance de chaques véhicules
+Time_Day = np.linspace(1,24,24)
+T_Sim = np.linspace(0, intervalle_temps, n_intervalles)
 
-voit = []
-table_naive = np.zeros((n_ev,n_intervalles))
-T = np.linspace(0, intervalle_temps, n_intervalles)
+V = 230 #V
 
-class Voiture:
-    def __init__(self, load_time, load_start, P):
-        self.load_time = load_time
-        self.P = P
-        self.load_need = int(self.load_time/delta_t) #Hypothèse que le besoin en charge est inférieur au temps total.
-        self.load_start = int(load_start/delta_t)
+r = 0.073 * 2 #Ohm/km
+x = 0.08 * 2 #Ohm/km
 
+length_branch1 = 189e-3 #km
+length_branch2 = 213e-3 #km
+length_branch3 = 218e-3 #km
 
-def load_table(voitures):
+R1 = length_branch1 * r
+R2 = length_branch2 * r
+R3 = length_branch3 * r
 
-    L = np.zeros((n_ev,n_intervalles))
-    c1 = voitures[0].load_start
-    c2 = voitures[0].load_need
-    v=0
+X1 = length_branch1 * x
+X2 = length_branch2 * x
+X3 = length_branch3 * x
 
-    while v+1<len(voitures):
+Delta_U_1_no_ev = (R1*active_house_load + X1*reactive_house_load)/V
+Delta_U_2_no_ev = (R2*active_house_load + X2*reactive_house_load)/V
+Delta_U_3_no_ev = (R3*active_house_load + X3*reactive_house_load)/V
 
-        for t in range(c1, c2):
-            L[v][t] = 1
-            voitures[v].load_need = voitures[v].load_need - 1
-            c1+=1
-        
-        if c1 == n_intervalles:
-            v+=1
-        else:
-            while c1 < n_intervalles:
-                while v+1<len(voitures):
-                    while voitures[v+1].load_need>0:
+Delta_U_1_ev_naif = (R1*(active_house_load+active_load_ev_naif) + X1*reactive_house_load)/V
+Delta_U_2_ev_naif = (R2*(active_house_load+active_load_ev_naif) + X2*reactive_house_load)/V
+Delta_U_3_ev_naif = (R3*(active_house_load+active_load_ev_naif)+ X3*reactive_house_load)/V
 
-                        L[v+1][c1]=1
-                        voitures[v+1].load_need = voitures[v+1].load_need - 1
-                        c1+=1
+Delta_U_1_ev_smart = (R1*(active_house_load+active_load_ev_smart) + X1*reactive_house_load)/V
+Delta_U_2_ev_smart = (R2*(active_house_load+active_load_ev_smart) + X2*reactive_house_load)/V
+Delta_U_3_ev_smart = (R3*(active_house_load+active_load_ev_smart)+ X3*reactive_house_load)/V
 
-                        if c1 == n_intervalles:
-                            break
+I_no_ev = apparent_house_load/V
+I_ev_naif = (active_house_load + active_load_ev_naif)/(V*0.8)
+I_ev_smart = (active_house_load + active_load_ev_smart)/(V*0.8)
 
-                    if c1 == n_intervalles and voitures[v+1].load_need == 0:
-                        v+=1
-                        break            
-                    elif c1 == n_intervalles and voitures[v+1].load_need > 0:
-                        break
-                    else:
-                        v+=1
-                if v+1 == len(voitures):
-                    break 
-                    
-        c1 = voitures[v].load_start
-        c2 = voitures[v].load_need
-        
-    return L
+### Affichage
+## Diagramme du planning de charge
+# Define colormap
 
-for i in range(n_ev):
-    voit.append(Voiture(random.randint(120,480), random.randint(0,120), 6))
+cmapmine = ListedColormap(['w', 'b'], N=2)
 
-voit.sort(key = lambda x: x.load_start)
+# Plot matrix
 
-for i in range(n_ev):
-    for t in  range(voit[i].load_start, voit[i].load_need):
-        table_naive[i][t]=1
+fig, ax1 = plt.subplots(1)
+ax1.imshow(table_charge_opti, cmap=cmapmine, vmin=0, vmax=1)
+ax1.set_title('Répartition de charge dans le temps (temps en unité de delta_t)')
 
-table_charge_opti = load_table(voit)
-print(table_charge_opti) #Need trier par l'attribut load_start
+plt.show()
 
-puissance_smart = np.sum(table_charge_opti,0) * p_ev
-puissance_naive = np.sum(table_naive,0) * p_ev
+## Appel de puissance réactive en fonction du temps pour les VE
 
-active_load_ev_naif = np.zeros((24))
-for i in range(17, len(active_load_ev_naif)):
-    active_load_ev_naif[i] = puissance_naive[(i-17)*6]
+plt.plot(T_Sim, puissance_smart,'b')
+plt.plot(T_Sim, puissance_naive,'g')
+plt.title("Appel de puissance réactive pour le chargement de VE avec et sans optimisation")
+plt.xlabel("Temps")
+plt.ylabel("Puissance (W)")
+plt.legend(("Chargement Smart","Chargement Naif"))
+plt.ylim(0, p_ev*n_ev*1.05)
+plt.show()
 
-active_load_ev_smart = np.zeros((24))
-for i in range(17, len(active_load_ev_naif)):
-    active_load_ev_smart[i] = puissance_smart[(i-17)*6]
+## Appel de puissance réactive totale
+
+plt.plot(Time_Day, active_house_load,'r')
+plt.plot(Time_Day, active_house_load+active_load_ev_naif,'g')
+plt.plot(Time_Day, active_house_load+active_load_ev_smart,'b')
+plt.title("Appel de puissance réactive total")
+plt.xlabel("Temps")
+plt.ylabel("Puissance (W)")
+plt.legend(("Chargement Naif","Chargement Smart"))
+plt.show()
+
+## Affichage DeltaV
+plt.plot(Time_Day, Delta_U_1_no_ev, 'r')
+plt.plot(Time_Day, Delta_U_2_no_ev, 'r')
+plt.plot(Time_Day, Delta_U_3_no_ev, 'r')
+plt.plot(Time_Day, Delta_U_1_ev_naif, 'g')
+plt.plot(Time_Day, Delta_U_2_ev_naif, 'g')
+plt.plot(Time_Day, Delta_U_3_ev_naif, 'g')
+plt.plot(Time_Day, Delta_U_1_ev_smart, 'b')
+plt.plot(Time_Day, Delta_U_2_ev_smart, 'b')
+plt.plot(Time_Day, Delta_U_3_ev_smart, 'b')
+plt.title("Chute de tension dans les trois branches sans EV")
+plt.xlabel("Temps")
+plt.ylabel("Volt (V)")
+plt.show()
+
+## Affichage Courant
+
+plt.plot(Time_Day,I_no_ev,'r')
+plt.plot(Time_Day,I_ev_naif,'g')
+plt.plot(Time_Day,I_ev_smart,'b')
+plt.title("Appel de courant sur les cables")
+plt.xlabel("Temps")
+plt.ylabel("Courant (A)")
+plt.legend(("Sans VE","Avec stratégie naive", "Avec stratégie smart"))
+plt.show()
+
