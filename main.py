@@ -102,4 +102,9 @@ plt.xlabel("Temps")
 plt.ylabel("Courant (A)")
 plt.legend(("Sans VE","Avec stratégie naive", "Avec stratégie smart"))
 plt.show()
+### load display to export to simulink
 
+print((np.divide(230**2,active_house_load)).tolist())
+print((np.divide(230**2,reactive_house_load*2*np.pi*50)).tolist())
+print((np.divide(230**2,active_load_ev_naif)).tolist())
+print((np.divide(230**2,active_load_ev_smart)).tolist())
