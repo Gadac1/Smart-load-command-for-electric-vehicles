@@ -55,23 +55,23 @@ ax1.set_title('Répartition de charge dans le temps (temps en unité de delta_t)
 
 plt.show()
 
-## Appel de puissance réactive en fonction du temps pour les VE
+## Appel de puissance active en fonction du temps pour les VE
 
 plt.plot(T_Sim, puissance_smart,'b')
 plt.plot(T_Sim, puissance_naive,'g')
-plt.title("Appel de puissance réactive pour le chargement de VE avec et sans optimisation")
+plt.title("Appel de puissance active pour le chargement de VE avec et sans optimisation")
 plt.xlabel("Temps")
 plt.ylabel("Puissance (W)")
 plt.legend(("Chargement Smart","Chargement Naif"))
 plt.ylim(0, p_ev*n_ev*1.05)
 plt.show()
 
-## Appel de puissance réactive totale
+## Appel de puissance active totale
 
 plt.plot(Time_Day, active_house_load,'r')
 plt.plot(Time_Day, active_house_load+active_load_ev_naif,'g')
 plt.plot(Time_Day, active_house_load+active_load_ev_smart,'b')
-plt.title("Appel de puissance réactive total")
+plt.title("Appel de puissance active total")
 plt.xlabel("Temps")
 plt.ylabel("Puissance (W)")
 plt.legend(("Chargement Naif","Chargement Smart"))
