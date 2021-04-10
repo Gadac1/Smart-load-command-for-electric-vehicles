@@ -6,7 +6,7 @@ import random
 intervalle_temps = 840 #Un intervalle global de charge en minutes (par exemple 360min pour une nuit de 8h)
 delta_t = 10 #Un découpage temporel en minutes
 n_intervalles = int(intervalle_temps/delta_t)
-n_ev = 24 #Le nombre de véhicule électriques à simuler
+n_ev = 8 #Le nombre de véhicule électriques à simuler
 p_ev = 6000 #W, l'appel de puissance de chaques véhicules
 
 voit = []
@@ -80,9 +80,9 @@ puissance_smart = np.sum(table_charge_opti,0) * p_ev
 puissance_naive = np.sum(table_naive,0) * p_ev
 
 active_load_ev_naif = np.zeros((24))
-for i in range(17, len(active_load_ev_naif)):
-    active_load_ev_naif[i] = puissance_naive[(i-17)*6]
+for i in range(16, len(active_load_ev_naif)):
+    active_load_ev_naif[i] = puissance_naive[(i-16)*6]
 
 active_load_ev_smart = np.zeros((24))
-for i in range(17, len(active_load_ev_naif)):
-    active_load_ev_smart[i] = puissance_smart[(i-17)*6]
+for i in range(16, len(active_load_ev_naif)):
+    active_load_ev_smart[i] = puissance_smart[(i-16)*6]
